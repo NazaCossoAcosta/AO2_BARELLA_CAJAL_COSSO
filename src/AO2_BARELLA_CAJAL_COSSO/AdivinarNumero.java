@@ -17,12 +17,20 @@ public class AdivinarNumero {
     static long[] tiempos;
 
     public static void main(String[] args) {
-        
-        int numero;// número a adivinar
+        int numero=0;// número a adivinar
         int numAleatorio;// numero aleatorio generado por el programa
         int contaErrores;// guardará la cantidad de error que tuvo el jugador  
+        boolean validacion=false;// verificación para el ciclo de control de excepciones
 
-        nJugadores=Integer.parseInt(JOptionPane.showInputDialog(null,"Ingrese la cantidad de jugadores", "Cantidad de Participantes", 1));
+        do{
+            try {
+                nJugadores=Integer.parseInt(JOptionPane.showInputDialog(null,"Ingrese la cantidad de jugadores", "Cantidad de Participantes", 1));
+                validacion=true;// cuando sea válido el ingreso saldrá del ciclo
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Debe ingresar un numero entero", "Error!!", 0);
+            }
+        }while(!validacion); //seguirá solicitando el ingreso de un número entero mientras lo que el usuario ingrese no sea válido
+
         int participantes=1;// contador de participantes
         nombres=new String[nJugadores];// array nombre de jugador
         intentos=new int[nJugadores];// array cantidad intentos de cada jugador
@@ -40,106 +48,208 @@ public class AdivinarNumero {
                 int contaIntentos=0;// cuenta número de intentos se coloca dentro del ciclo externo para que vuelva a cero al tocarle el turno al siguiente participante
 
                 do {
-                    numero=Integer.parseInt(JOptionPane.showInputDialog(null, "Ingrese un número", "Elección Nro", 1));
-                    contaIntentos++;// cuenta la cantidad de intentos del jugador
-                    
-                    if(numero==numAleatorio){// el mensaje de felicitaciones se coloca al principio del ciclo interno para que no se anteponga un cuadro de diálogo de las opciones que le siguen
-                        JOptionPane.showMessageDialog(null, "Usted ha adivinado el número "+numAleatorio+" en "+contaIntentos+" intentos", "Felicitaciones!!", 1);// imprime el número y la cantidad de intentos del jugador
-                        termina=Instant.now();// se utiliza la clase instanta para marcar el momento en que termina la partida que es cuando el jugador a adivinado el número y recibido el mensaje de felicitación
+                    try {
+                        numero=Integer.parseInt(JOptionPane.showInputDialog(null, "Ingrese un número", "Elección Nro", 1));
+                        contaIntentos++;// cuenta la cantidad de intentos del jugador
+                        
+                        if(numero==numAleatorio){// el mensaje de felicitaciones se coloca al principio del ciclo interno para que no se anteponga un cuadro de diálogo de las opciones que le siguen
+                            JOptionPane.showMessageDialog(null, "Usted ha adivinado el número "+numAleatorio+" en "+contaIntentos+" intentos", "Felicitaciones!!", 1);// imprime el número y la cantidad de intentos del jugador
+                            termina=Instant.now();// se utiliza la clase instanta para marcar el momento en que termina la partida que es cuando el jugador a adivinado el número y recibido el mensaje de felicitación
+                        }
+                        else if (numAleatorio>numero) {
+                            JOptionPane.showMessageDialog(null, "Demasiado bajo...Ingrese un número mayor", "Nueva Elección", 1);// solicitará otro número si nro aleatorio es mayor al que ingreso el usuario
+                        
+                        } else{
+                            JOptionPane.showMessageDialog(null, "Demasiado alto...Ingrese un número menor", "Nueva Elección", 1);// solicitará otro número si nro aleatorio es menor al que ingreso el usuario
+                            
+                        }
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(null, "Debe ingresar un numero entero", "Error!!", 0);
                     }
-                    else if (numAleatorio>numero) {
-                        JOptionPane.showMessageDialog(null, "Demasiado bajo...Ingrese un número mayor", "Nueva Elección", 1);// solicitará otro número si nro aleatorio es mayor al que ingreso el usuario
-                        // contaErrrores++;
-                    } else{
-                        JOptionPane.showMessageDialog(null, "Demasiado alto...Ingrese un número menor", "Nueva Elección", 1);// solicitará otro número si nro aleatorio es menor al que ingreso el usuario
-                        // contaErrrores++;
-                    }
-                    
+                     
                 } while (numero!=numAleatorio);// iterará hasta que el numero ingresado por el usuario coincida con el aleatorio
                 
-                intentos[participantes-1] = contaIntentos;
-                contaErrores=contaIntentos-1;
-                errores[participantes-1] = contaErrores;
-                Duration duracion=Duration.between(comienza, termina);
-                tiempos[participantes-1]=duracion.getSeconds(); // Devuelve segundos del jugador
-                participantes++;
-            
+                intentos[participantes-1]=contaIntentos;// al arreglo intentos se le asigna la cantidad de intentos totales a la posición del nombre correspondiente de cada jugador
 
+                contaErrores=contaIntentos-1;// los errores serán todos los anteriores menos el último en que el jugador adiniva el número
+
+                errores[participantes-1]=contaErrores;// al arreglo errores se le asigna la cantidad de errores totales a la posición del nombre correspondiente de cada jugador
+
+                Duration duracion=Duration.between(comienza, termina); //calcula el tiempo entre comienzo y final de cada partida de cada jugador
+                tiempos[participantes-1]=duracion.getSeconds(); // Devuelve segundos del jugador
+                
+                participantes++;// cuenta a medida que finaliza la jugada cada participante, sirve como bandera para salir del ciclo externo y como referencia de índice-1  en los arreglos
+            
             }while(participantes<=nJugadores);// cuando la cantidad de participantes sea igual a la cantidad de jugadores ingresada al inicio saldrá del programa
     
-            resumen(nombres, intentos, errores, tiempos);
-
-            int opcion=-1;// inicializada en -1 para que la primer opción del menú sea cero
+           
+        //---------------------//
+        //Menú con Estadísticas// 
+        //---------------------//
+        int opcion=-1;// inicializada en -1 para que la primer opción del menú sea cero
 
         do {
                 String[] opcionNro = {
-                "Ingresar Producto", 
-                "Orden por COD", 
-                "Búsqueda Secuencial por COD", 
-                "Búsqueda Binaria por COD", 
-                "Producto de mayor precio", 
-                "Finalizar Operación"
+                "Ganador del Premio", 
+                "Jugador más rápido", 
+                "Jugador más lento", 
+                "Jugador con menor performance", 
+                "Promedio de errores entre jugadores",
+                "Informe Final", 
+                "Finalizar Estadísticas"
                 };
                 
-                String seleccion = (String) JOptionPane.showInputDialog(null, "Seleccione la Operación que desea realizar...", "Menú Principal",
+                String seleccion = (String) JOptionPane.showInputDialog(null, "Seleccione la Operación que desea realizar...", "Estadísticas",
                 JOptionPane.QUESTION_MESSAGE, null, opcionNro, opcionNro[0]); //contiene al array "opcionNro" como una lista
                 if (seleccion != null) {
                 opcion=Arrays.asList(opcionNro).indexOf(seleccion); //Arrays.asList contiene la lista de opciones e indexOf asignará un valor numérico según la posición de la opción en la lista y ese valor numérico es el que tomará la variable "opcion" para ingresar a la opción correspondiente en Switch
                 } else {
-                    opcion=5; //Sale del programa
+                    opcion=6; //Sale del menú
                 }    
 
             switch (opcion) {
                 case 0:
-                    // cargarDatos(codigo, nombre, precio);
-                    // mostrarDatos(codigo, nombre, precio);
+                    JOptionPane.showMessageDialog(null, menosIntentos(nombres, intentos), "Ganador!!",1);
                     break;
                 case 1:
-                    // ordenaCodigo(codigo, nombre, precio);
-                    // mostrarOrdenAsc(codigo, nombre, precio);
+                    JOptionPane.showMessageDialog(null, masRapido(nombres, tiempos),"Jugador más rápido", 1);
                     break;
                 case 2:
-                    // buscarProd(codigo, nombre, precio);
+                    masLento(nombres, tiempos);
                     break;
                 case 3:
-                    // ordenaCodigo(codigo, nombre, precio);
-                    // busquedaBinaria(codigo, nombre, precio);
+                    menorPerformance(nombres, intentos, errores);
                     break;
                 case 4:
-                    // JOptionPane.showMessageDialog(null, "El producto de mayor precio es "+nombre[posMayorPrecio(precio)], "Producto más caro", 1);
+                    JOptionPane.showMessageDialog(null, promErrores(nombres, errores), "Promedio Total Errores",1);
+                    break;
+                case 5:
+                    informe();
                     break;
                 default:
-                    // JOptionPane.showMessageDialog(null, "Operación Finalizada");
-                    // System.exit(0);
+                    JOptionPane.showMessageDialog(null, "Estadísticas Finalizada");
+                    System.exit(0);
                     break;
             }
-        } while (opcion!=5);
-
+        } while (opcion!=6); 
     }
+
+    /*Los métodos declarados a continuación se utilizaron para darle más legibilidad a la lectura del código de cada opción del menú Switch y al ingreso de datos en el array nombres[] en el programa principal*/
 
 
     //-------------------------//
-    //Ingreso nombre de jugador// al entrar al bucle externo toma el nombre del primer jugador una vez que este adivine el número toma el dato nombre del siguiente jugador 
+    //Ingreso nombre de jugador// 
     //-------------------------//
     public static void nombreJugador(String[] nombres){
+        String nombre;
+
         for (int i=0; i<nombres.length; i++) {
-            nombres[i]=JOptionPane.showInputDialog(null, "Ingrese nombre del Jugador "+(i+1), "Datos Jugador", 1);// el imput se asigna directamente al array para no declarar una variable intermedia
+            do{
+                nombre=JOptionPane.showInputDialog(null, "Ingrese nombre del Jugador "+(i+1), "Datos Jugador", 1);// el imput se asigna directamente al array para no declarar una variable intermedia
+                
+                if (nombre==null||nombre.isEmpty()||!nombre.matches("[a-zA-Z]+")) {//isEmty() controla que la cadena no esté vacía, vacía=true sino false // matches() guarda un patrón que indica que es lo que acepta la variable como ingreso de su valor, en este caso solo letras mayúsculas y minúsculas, devolverá true si lo ingresado NO contiene solo letras en este caso por eso se antepone el símbolo de negación 
+                    JOptionPane.showMessageDialog(null, "Ingrese un nombre válido", "Error!!", 0);
+                } else {
+                    nombres[i]=nombre;//si la cadena ingresada como nombre es correcta, la asigna como elemento del array nombres
+                }
+            }while(nombre==null||nombre.isEmpty()||!nombre.matches("[a-zA-Z]+"));
         }
     }
 
 
-    //---------------//
-    //Muestra resumen// al entrar al bucle externo toma el nombre del primer jugador una vez que este adivine el número toma el dato nombre del siguiente jugador 
-    //------------ --//
-    public static void resumen(String[] nombres, int[] intentos, int[] errores, long[] t) {
-        StringBuilder mensaje = new StringBuilder();
+    //--------------------------//
+    //Muestra nombre del Ganador//con menos intentos, se declara como string para utilizarlo en la opción correspondiente dentro del Switch e imprimirlo en el informe final 
+    //--------------------------//
+    public static String menosIntentos(String[] nombres, int[] intentos){
+        int menosInt=intentos[0];
+        int pos=0;
 
-        for (int i = 0; i < nombres.length; i++) {
-            mensaje.append("\nJugador: "+nombres[i]).append(" Intentos: "+intentos[i]).append(" Errores: "+errores[i]).append(" Tiempo: "+t[i]+" segundos.");
-            JOptionPane.showMessageDialog(null, mensaje.toString(), "Resumen", 1);
+        for(int i=0; i<intentos.length; i++){
+            if(intentos[i]<menosInt){
+                menosInt=intentos[i];
+                pos=i;
+            }
         }
-
+        return "El jugador "+nombres[pos]+" ha ganado el premio!!"+" con en el menor número de intentos>>> "+menosInt+" total";
     }
 
 
+    //--------------------------//
+    //Muestra jugador más rápido//el que tardo menos tiempo, se declara como string para utilizarlo en la opción correspondiente dentro del Switch e imprimirlo en el informe final
+    //--------------------------//
+    public static String masRapido(String[] nombres, long[] tiempos){
+        long menosTiempo=tiempos[0];
+        int pos=0;
+
+        for(int i=0; i<tiempos.length; i++){
+            if(tiempos[i]<menosTiempo){
+                menosTiempo=tiempos[i];
+                pos=i;
+            }
+        }
+        return "El jugador "+nombres[pos]+" ha tardado "+menosTiempo+" segundos en adivinar el número, siendo el que menor tiempo ha hecho de todos los jugadores";
+    }
+
+
+    //-------------------------//
+    //Muestra jugador más lento//el que tardo más tiempo 
+    //-------------------------//
+    public static void masLento(String[] nombres, long[] tiempos){
+        long masTiempo=tiempos[0];
+        int pos=0;
+
+        for(int i=0; i<tiempos.length; i++){
+            if(tiempos[i]>masTiempo){
+                masTiempo=tiempos[i];
+                pos=i;
+            }
+        }
+        JOptionPane.showMessageDialog(null, "El jugador "+nombres[pos]+" ha tardado "+masTiempo+" segundos en adivinar el número, siendo el que mayor tiempo ha hecho de todos los jugadores","Jugador más lento", 1);
+    }
+
+
+    //----------------------------------------//
+    //Muestra el jugador con menor performance//el que más intentos y errores tuvo 
+    //----------------------------------------//
+    public static void menorPerformance(String[] nombres, int[] intentos, int[] errores){
+        int masInt=intentos[0];
+        int masError=errores[0];
+        int pos=0;
+
+        for(int i=0; i<intentos.length&&i<errores.length; i++){
+            if(intentos[i]>masInt&&errores[i]>masError){
+                masInt=intentos[i];
+                masError=errores[i];
+                pos=i;
+            }
+        }
+        JOptionPane.showMessageDialog(null, "El jugador "+nombres[pos]+" es el que menor performance ha tenido con "+masInt+" intentos y "+masError+" errores totales", "Menor Performance",1);
+    }
+
+
+    //---------------------------------------------//
+    //Promedio de errores entre todos los jugadores// suma la cantidad de errores de cada jugador y lo divide por la cantidad total de jugadores, se declara como string para utilizarlo en la opción correspondiente dentro del Switch e imprimirlo en el informe final  
+    //---------------------------------------------//
+    public static String promErrores(String[] nombres, int[] errores){
+        int sumaError=errores[0];
+        double promErrores;
+
+        for(int i=0; i<errores.length; i++){
+            sumaError+=errores[i];
+        }
+        promErrores=(sumaError/nombres.length);
+        return "El promedio de errores entre todos los jugadores es de "+promErrores+" errores";
+    }
+
+
+    //---------------------//
+    //Muestra Informe Final//para que imprima un resumen de las estadísticas se declararon los métodos utilizados dentro del método informe como String que se suman y se asignan a la variable mensaje la cual sera impresa en un solo JOptionPane   
+    //---------------------//
+    public static void informe() {
+        String mensaje="";
+        mensaje+="\n"+menosIntentos(nombres, intentos);
+        mensaje+="\n"+masRapido(nombres, tiempos);
+        mensaje+="\n"+promErrores(nombres, errores);
+        JOptionPane.showMessageDialog(null, mensaje, "Informe Final", 1);
+    }
 }
